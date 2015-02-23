@@ -365,16 +365,11 @@ public class SongListActivity extends FragmentActivity {
                 playing=0;
             }
             else{
-                if(musicSrv.isPrepared()) {
-                    musicSrv.start();
+                musicSrv.start();
+                if(musicSrv.isPlaying()) {
                     imgvStop.setImageResource(R.drawable.stop);
                     playing = 1;
                 }
-                else{
-                    Toast.makeText(getApplicationContext(), res.getString(R.string.no_song_playing), Toast.LENGTH_SHORT).show();
-                }
-
-
             }
         }
         else if(command.equals("rewind")){

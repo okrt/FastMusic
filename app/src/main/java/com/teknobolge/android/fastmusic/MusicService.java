@@ -152,8 +152,11 @@ Service intilaziton and MediaPlayer preperation
         startsong();
     }
     public void startsong(){
-        player.reset();
-
+        try {
+            player.reset();
+        }
+        catch (Exception ex)
+        {ex.printStackTrace();}
         Uri trackUri = ContentUris.withAppendedId(
                 android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                 currentSongID);
@@ -182,11 +185,27 @@ Service intilaziton and MediaPlayer preperation
     public  void stop(){
         player.stop();
     }
+    public void release(){
+        player.release();
+    }
     public  void pause(){
         player.pause();
     }
     public  void start(){
-        player.start();
+        if(prepared) {
+            player.start();
+        }
+        else
+        {
+            if(currentSongID!=0) {
+                player = new MediaPlayer() ;
+                prepareplayer();
+                startsong();
+            }
+            else{
+                Toast.makeText(getApplicationContext(), res.getString(R.string.no_song_playing), Toast.LENGTH_SHORT).show();
+            }
+        }
     }
     public void forward(){
 
@@ -236,7 +255,14 @@ Service intilaziton and MediaPlayer preperation
     Get information from player
  */
     public boolean isPlaying(){
-        return player.isPlaying();
+        try {
+            return player.isPlaying();
+        }
+        catch (IllegalStateException e)
+        {
+            prepared=false;
+            return false;
+        }
     }
     public int currentPosition(){
         return player.getCurrentPosition();

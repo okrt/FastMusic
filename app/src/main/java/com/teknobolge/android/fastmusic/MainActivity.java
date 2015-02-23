@@ -299,16 +299,11 @@ public class MainActivity extends FragmentActivity {
                 playing=0;
             }
             else{
-                if(musicSrv.isPrepared()) {
                     musicSrv.start();
-                    imgvStop.setImageResource(R.drawable.stop);
-                    playing = 1;
-                }
-                else{
-                    Toast.makeText(getApplicationContext(), res.getString(R.string.no_song_playing), Toast.LENGTH_SHORT).show();
-                }
-
-
+                    if(musicSrv.isPlaying()) {
+                        imgvStop.setImageResource(R.drawable.stop);
+                        playing = 1;
+                    }
             }
         }
         else if(command.equals("rewind")){
