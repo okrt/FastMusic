@@ -312,16 +312,25 @@ public class MainActivity extends FragmentActivity {
             }
         }
         else if(command.equals("rewind")){
-            musicSrv.rewind();
+            if(musicSrv.isPrepared()) {
+                musicSrv.rewind();
+            }
+
         }
         else if(command.equals("forward")){
-            musicSrv.forward();
+            if(musicSrv.isPrepared()) {
+                musicSrv.forward();
+            }
         }
         else if(command.equals("next")){
-            musicSrv.playNext();
+            if(musicSrv.isPrepared()) {
+                musicSrv.playNext();
+            }
         }
         else if(command.equals("prev")){
-            musicSrv.playPrev();
+            if(musicSrv.isPrepared()) {
+                musicSrv.playPrev();
+            }
         }
 
 
