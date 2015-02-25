@@ -9,6 +9,7 @@ FastMusic is also on Google Play Store if you want to test alpha builds.
 <ul>
 <li><a target="_blank"  href="https://plus.google.com/communities/109803960827857968828">Join Google+ Community</li>
 <li><a target="_blank"  href="https://play.google.com/apps/testing/com.teknobolge.android.fastmusic">Enroll Alpha Testing</a></li>
+<li><a target="_blank"  href="https://play.google.com/store/apps/details?id=com.teknobolge.android.fastmusic">Download the app (You might need to wait few minutes after previous steps.)</a></li>
 </ul>
 <br>
 This project is built from ground up by myself but I used experience I gained from <a target="_blank" href="https://github.com/okrt/CevikMuzik">CevikMuzik</a>, which I developed with my friends as a school project.
