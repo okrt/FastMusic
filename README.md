@@ -1,5 +1,5 @@
 # FastMusic
-FastMusic is an Android music player for those who prefers simplicity and performance.
+FastMusic is an Android music player for those who prefer simplicity and performance.
 <br>
 This is an alpha stage software, please do not expect too many features (for now). I'm learning Android and trying to build a working project as soon as possible, so code might not be perfect at this time.
 <br>

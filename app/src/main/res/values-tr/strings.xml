@@ -15,4 +15,5 @@
     <string name="error_playing_song">Bu şarkı çalınırken bir hata oluştu.</string>
     <string name="error_initializing">Ortam yürütücü oynatmaya hazırlanırken bir hata oluştu.</string>
     <string name="no_song_playing">Oynatacak şarkı yok, lütfen bir şarkı seçiniz.</string>
+    <string name="title_activity_now_playing">Şimdi Çalınıyor</string>
 </resources>
