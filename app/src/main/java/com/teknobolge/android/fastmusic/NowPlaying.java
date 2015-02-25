@@ -32,6 +32,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.AdapterView;
 import android.widget.Toast;
 
 import com.astuetz.PagerSlidingTabStrip;
@@ -39,18 +40,20 @@ import com.readystatesoftware.systembartint.SystemBarTintManager;
 
 import java.util.ArrayList;
 
-public class MainActivity extends FragmentActivity {
+public class NowPlaying extends FragmentActivity {
 
-	private final Handler handler = new Handler();
+    private final Handler handler = new Handler();
+    private Intent intent;
     private Resources res;
-	private PagerSlidingTabStrip tabs;
-    private RelativeLayout rlControlsBg;
+    private PagerSlidingTabStrip tabs;
     private String palbumkey="";
-	private ViewPager pager;
-	private MyPagerAdapter adapter;
+    private ViewPager pager;
+    private MyPagerAdapter adapter;
     private ImageView imgvStop;
-	private Drawable oldBackground = null;
-	private int currentColor = 0xFF666666;
+    private RelativeLayout rlControlsBg;
+    private Drawable oldBackground = null;
+    private int currentColor = 0xFF666666;
+    int playing=2;
     public ArrayList<String> songList;
     private ListView songView;
     String[] sarkilarlistesi;
@@ -64,7 +67,7 @@ public class MainActivity extends FragmentActivity {
 
 
     //activity and playback pause flags
-    private int playing=2;
+    private boolean paused=false, playbackPaused=false;
     Handler updateViewHandler = new Handler();
     private ServiceConnection musicConnection = new ServiceConnection(){
 
@@ -113,54 +116,58 @@ public class MainActivity extends FragmentActivity {
             playIntent = new Intent(getApplicationContext(), MusicService.class);
             getApplicationContext().bindService(playIntent, musicConnection, Context.BIND_AUTO_CREATE);
             getApplicationContext().startService(playIntent);
-           // setBarColor(0xFF666666);
+            // setBarColor(0xFF666666);
         }
 
     }
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_main);
-
-		tabs = (PagerSlidingTabStrip) findViewById(R.id.tabs);
-		pager = (ViewPager) findViewById(R.id.pager);
-		adapter = new MyPagerAdapter(getSupportFragmentManager());
-        rlControlsBg=(RelativeLayout)findViewById(R.id.controlsbg);
-		pager.setAdapter(adapter);
-
-		final int pageMargin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4, getResources()
-				.getDisplayMetrics());
-		pager.setPageMargin(pageMargin);
-
-		tabs.setViewPager(pager);
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.now_playing);
         imgvStop=(ImageView)findViewById(R.id.stop);
-		changeColor(currentColor);
+        rlControlsBg=(RelativeLayout)findViewById(R.id.controlsbg);
+        tabs = (PagerSlidingTabStrip) findViewById(R.id.tabs);
+        changeColor(currentColor);
+        rlControlsBg.setBackgroundColor(Color.parseColor("#80666666"));
         Intent servicestart = new Intent(this, MusicService.class);
         startService(servicestart);
+        imgvStop=(ImageView)findViewById(R.id.stop);
+        //pager = (ViewPager) findViewById(R.id.pager);
+        adapter = new MyPagerAdapter(getSupportFragmentManager());
 
-	}
+//        pager.setAdapter(adapter);
 
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.main, menu);
-		return true;
-	}
+        final int pageMargin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4, getResources()
+                .getDisplayMetrics());
+//        pager.setPageMargin(pageMargin);
 
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
+        //tabs.setViewPager(pager);
 
-		switch (item.getItemId()) {
 
-		case R.id.action_contact:
-			QuickContactFragment dialog = new QuickContactFragment();
-			dialog.show(getSupportFragmentManager(), "QuickContactFragment");
-			return true;
+        }
 
-		}
 
-		return super.onOptionsItemSelected(item);
-	}
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        switch (item.getItemId()) {
+
+            case R.id.action_contact:
+                QuickContactFragment dialog = new QuickContactFragment();
+                dialog.show(getSupportFragmentManager(), "QuickContactFragment");
+                return true;
+
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
     Runnable run = new Runnable() {
 
         @Override
@@ -214,7 +221,8 @@ public class MainActivity extends FragmentActivity {
                             }
                             setBarColor(renk);
                             changeColor(renk);
-                            String tcolor="#AA"+String.format("%06X", 0xFFFFFF & renk);
+
+                            String tcolor="#80"+String.format("%06X", 0xFFFFFF & renk);
                             rlControlsBg.setBackgroundColor(Color.parseColor(tcolor));
                         }
                     });
@@ -239,60 +247,60 @@ public class MainActivity extends FragmentActivity {
         }
         updateViewHandler.postDelayed(run, 1000);
     }
-	public void changeColor(int newColor) {
+    public void changeColor(int newColor) {
 
-		tabs.setIndicatorColor(newColor);
+        tabs.setIndicatorColor(newColor);
 
-		// change ActionBar color just if an ActionBar is available
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+        // change ActionBar color just if an ActionBar is available
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
 
-			Drawable colorDrawable = new ColorDrawable(newColor);
-			Drawable bottomDrawable = getResources().getDrawable(R.drawable.actionbar_bottom);
-			LayerDrawable ld = new LayerDrawable(new Drawable[] { colorDrawable, bottomDrawable });
+            Drawable colorDrawable = new ColorDrawable(newColor);
+            Drawable bottomDrawable = getResources().getDrawable(R.drawable.actionbar_bottom);
+            LayerDrawable ld = new LayerDrawable(new Drawable[] { colorDrawable, bottomDrawable });
 
-			if (oldBackground == null) {
+            if (oldBackground == null) {
 
-				if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
-					ld.setCallback(drawableCallback);
-				} else {
-					getActionBar().setBackgroundDrawable(ld);
-				}
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                    ld.setCallback(drawableCallback);
+                } else {
+                    getActionBar().setBackgroundDrawable(ld);
+                }
 
-			} else {
+            } else {
 
-				TransitionDrawable td = new TransitionDrawable(new Drawable[] { oldBackground, ld });
+                TransitionDrawable td = new TransitionDrawable(new Drawable[] { oldBackground, ld });
 
-				// workaround for broken ActionBarContainer drawable handling on
-				// pre-API 17 builds
-				// https://github.com/android/platform_frameworks_base/commit/a7cc06d82e45918c37429a59b14545c6a57db4e4
-				if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
-					td.setCallback(drawableCallback);
-				} else {
-					getActionBar().setBackgroundDrawable(td);
-				}
+                // workaround for broken ActionBarContainer drawable handling on
+                // pre-API 17 builds
+                // https://github.com/android/platform_frameworks_base/commit/a7cc06d82e45918c37429a59b14545c6a57db4e4
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                    td.setCallback(drawableCallback);
+                } else {
+                    getActionBar().setBackgroundDrawable(td);
+                }
 
-				td.startTransition(200);
+                td.startTransition(10);
 
-			}
+            }
 
-			oldBackground = ld;
+            oldBackground = ld;
 
-			// http://stackoverflow.com/questions/11002691/actionbar-setbackgrounddrawable-nulling-background-from-thread-handler
-			getActionBar().setDisplayShowTitleEnabled(false);
-			getActionBar().setDisplayShowTitleEnabled(true);
+            // http://stackoverflow.com/questions/11002691/actionbar-setbackgrounddrawable-nulling-background-from-thread-handler
+            getActionBar().setDisplayShowTitleEnabled(false);
+            getActionBar().setDisplayShowTitleEnabled(true);
 
-		}
+        }
 
-		currentColor = newColor;
+        currentColor = newColor;
 
-	}
+    }
 
-	public void onColorClicked(View v) {
+    public void onColorClicked(View v) {
 
-		int color = Color.parseColor(v.getTag().toString());
-		changeColor(color);
+        int color = Color.parseColor(v.getTag().toString());
+        changeColor(color);
 
-	}
+    }
     public void onControlClicked(View v) {
 
         String command = v.getTag().toString();
@@ -303,11 +311,11 @@ public class MainActivity extends FragmentActivity {
                 playing=0;
             }
             else{
-                    musicSrv.start();
-                    if(musicSrv.isPlaying()) {
-                        imgvStop.setImageResource(R.drawable.stop);
-                        playing = 1;
-                    }
+                musicSrv.start();
+                if(musicSrv.isPlaying()) {
+                    imgvStop.setImageResource(R.drawable.stop);
+                    playing = 1;
+                }
             }
         }
         else if(command.equals("rewind")){
@@ -331,69 +339,64 @@ public class MainActivity extends FragmentActivity {
                 musicSrv.playPrev();
             }
         }
-        else if(command.equals("albumArt")) {
-            Intent intent=new Intent(this, NowPlaying.class);
-            startActivity(intent);
-        }
 
 
     }
-	@Override
-	protected void onSaveInstanceState(Bundle outState) {
-		super.onSaveInstanceState(outState);
-		outState.putInt("currentColor", currentColor);
-	}
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt("currentColor", currentColor);
+    }
 
-	@Override
-	protected void onRestoreInstanceState(Bundle savedInstanceState) {
-		super.onRestoreInstanceState(savedInstanceState);
-		currentColor = savedInstanceState.getInt("currentColor");
-		changeColor(currentColor);
-	}
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        currentColor = savedInstanceState.getInt("currentColor");
+        changeColor(currentColor);
+    }
 
-	private Drawable.Callback drawableCallback = new Drawable.Callback() {
-		@Override
-		public void invalidateDrawable(Drawable who) {
-
+    private Drawable.Callback drawableCallback = new Drawable.Callback() {
+        @Override
+        public void invalidateDrawable(Drawable who) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
                 getActionBar().setBackgroundDrawable(who);
             }
-		}
+        }
 
-		@Override
-		public void scheduleDrawable(Drawable who, Runnable what, long when) {
-			handler.postAtTime(what, when);
-		}
+        @Override
+        public void scheduleDrawable(Drawable who, Runnable what, long when) {
+            handler.postAtTime(what, when);
+        }
 
-		@Override
-		public void unscheduleDrawable(Drawable who, Runnable what) {
-			handler.removeCallbacks(what);
-		}
-	};
+        @Override
+        public void unscheduleDrawable(Drawable who, Runnable what) {
+            handler.removeCallbacks(what);
+        }
+    };
 
-	public class MyPagerAdapter extends FragmentPagerAdapter {
+    public class MyPagerAdapter extends FragmentPagerAdapter {
         Resources res = getResources();
-		private final String[] TITLES = { res.getString(R.string.artists), res.getString(R.string.albums), res.getString(R.string.songs) };
+        private final String[] TITLES = { res.getString(R.string.artists), res.getString(R.string.albums), res.getString(R.string.songs) };
 
-		public MyPagerAdapter(FragmentManager fm) {
-			super(fm);
-		}
+        public MyPagerAdapter(FragmentManager fm) {
+            super(fm);
+        }
 
-		@Override
-		public CharSequence getPageTitle(int position) {
-			return TITLES[position];
-		}
+        @Override
+        public CharSequence getPageTitle(int position) {
+            return TITLES[position];
+        }
 
-		@Override
-		public int getCount() {
-			return TITLES.length;
-		}
+        @Override
+        public int getCount() {
+            return TITLES.length;
+        }
 
-		@Override
-		public Fragment getItem(int position) {
-			return LibraryFragment.newInstance(position);
-		}
+        @Override
+        public Fragment getItem(int position) {
+            return LibraryFragment.newInstance(position);
+        }
 
-	}
+    }
 
 }

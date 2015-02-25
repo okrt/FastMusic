@@ -30,6 +30,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.AdapterView;
 import android.widget.Toast;
@@ -45,6 +46,7 @@ public class SongListActivity extends FragmentActivity {
     private Intent intent;
     private Resources res;
     private PagerSlidingTabStrip tabs;
+    private RelativeLayout rlControlsBg;
     private String palbumkey="";
     private ViewPager pager;
     private MyPagerAdapter adapter;
@@ -123,7 +125,7 @@ public class SongListActivity extends FragmentActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_song_list);
-
+        rlControlsBg=(RelativeLayout)findViewById(R.id.controlsbg);
         tabs = (PagerSlidingTabStrip) findViewById(R.id.tabs);
         //pager = (ViewPager) findViewById(R.id.pager);
         adapter = new MyPagerAdapter(getSupportFragmentManager());
@@ -278,6 +280,8 @@ public class SongListActivity extends FragmentActivity {
                             }
                             setBarColor(renk);
                             changeColor(renk);
+                            String tcolor="#AA"+String.format("%06X", 0xFFFFFF & renk);
+                            rlControlsBg.setBackgroundColor(Color.parseColor(tcolor));
                         }
                     });
 
@@ -392,6 +396,10 @@ public class SongListActivity extends FragmentActivity {
             if(musicSrv.isPrepared()) {
                 musicSrv.playPrev();
             }
+        }
+        else if(command.equals("albumArt")) {
+            Intent intent=new Intent(this, NowPlaying.class);
+            startActivity(intent);
         }
 
 

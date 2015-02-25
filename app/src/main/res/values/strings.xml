@@ -15,4 +15,5 @@
     <string name="error_playing_song">An error occured while trying to play this song.</string>
     <string name="error_initializing">An error occured while initialing media player.</string>
     <string name="no_song_playing">There is no song to play, please select one.</string>
+    <string name="title_activity_now_playing">Now Playing</string>
 </resources>

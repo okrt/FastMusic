@@ -28,6 +28,10 @@
             android:name=".SongListActivity"
             android:label="@string/title_activity_song_list" >
         </activity>
+        <activity
+            android:name=".NowPlaying"
+            android:label="@string/title_activity_now_playing" >
+        </activity>
     </application>
 
 </manifest>
