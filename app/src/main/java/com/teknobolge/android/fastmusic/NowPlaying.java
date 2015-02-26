@@ -8,6 +8,7 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
@@ -22,6 +23,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.graphics.Palette;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Menu;
@@ -39,6 +41,7 @@ import com.astuetz.PagerSlidingTabStrip;
 import com.readystatesoftware.systembartint.SystemBarTintManager;
 
 import java.util.ArrayList;
+import java.util.concurrent.ExecutionException;
 
 public class NowPlaying extends FragmentActivity {
 
@@ -60,6 +63,8 @@ public class NowPlaying extends FragmentActivity {
     //service
     public MusicService musicSrv;
     private Intent playIntent;
+    private Bitmap albumart;
+    ImageView albumimage;
     //binding
     private boolean musicBound=false;
 
@@ -122,9 +127,24 @@ public class NowPlaying extends FragmentActivity {
     }
 
     @Override
+    public void onPause(){
+        super.onPause();
+        palbumkey="";
+        ((BitmapDrawable)albumimage.getDrawable()).getBitmap().recycle();
+        albumimage.setImageDrawable(null);
+        try {
+            albumart.recycle();
+        }
+        catch(NullPointerException e)
+        {
+
+        }
+    }
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.now_playing);
+        albumimage = (ImageView) findViewById(R.id.albumArt);
         imgvStop=(ImageView)findViewById(R.id.stop);
         rlControlsBg=(RelativeLayout)findViewById(R.id.controlsbg);
         tabs = (PagerSlidingTabStrip) findViewById(R.id.tabs);
@@ -205,9 +225,26 @@ public class NowPlaying extends FragmentActivity {
                 MusicLibrary ml = new MusicLibrary(getApplicationContext());
                 String art=ml.getAlbumArt(musicSrv.getAlbumKey());
                 if(art!=null&&!art.equals("")) {
-                    Bitmap albumart = BitmapFactory.decodeFile(art);
-                    ImageView albumimage = (ImageView) findViewById(R.id.albumArt);
+                    try{((BitmapDrawable)albumimage.getDrawable()).getBitmap().recycle();
+                        albumimage.setImageDrawable(null);}
+                    catch(NullPointerException ex){
+                        ex.printStackTrace();
+                    }
+                    final BitmapFactory.Options options = new BitmapFactory.Options();
+                    options.inJustDecodeBounds = true;
+                    BitmapFactory.decodeFile(art, options);
+                    DisplayMetrics displayMetrics = new DisplayMetrics();
+                    WindowManager wm = (WindowManager) getApplicationContext().getSystemService(Context.WINDOW_SERVICE);
+                    wm.getDefaultDisplay().getMetrics(displayMetrics);
+                    int s=MusicLibrary.getMax(displayMetrics.widthPixels, displayMetrics.heightPixels);
+                    // Calculate inSampleSize
+                    options.inSampleSize = MusicLibrary.calculateInSampleSize(options, s, s);
+                    // Decode bitmap with inSampleSize set
+                    options.inJustDecodeBounds = false;
+                    Bitmap albumart = BitmapFactory.decodeFile(art,options);
+
                     albumimage.setImageBitmap(albumart);
+
                     Palette.generateAsync(albumart, new Palette.PaletteAsyncListener() {
                         public void onGenerated(Palette palette) {
                             int renk;
@@ -228,11 +265,11 @@ public class NowPlaying extends FragmentActivity {
                     });
 
                 }
-                else{ImageView albumimage = (ImageView) findViewById(R.id.albumArt);
+                else{
                     albumimage.setImageResource(R.drawable.ic_launcher);}
 
             } catch (Exception ex) {
-                ImageView albumimage = (ImageView) findViewById(R.id.albumArt);
+
                 albumimage.setImageResource(R.drawable.ic_launcher);
             }
             palbumkey=musicSrv.getAlbumKey();
