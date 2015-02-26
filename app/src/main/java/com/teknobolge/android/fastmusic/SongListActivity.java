@@ -234,6 +234,7 @@ public class SongListActivity extends FragmentActivity {
             updateViewFromService();
         }
     };
+
     public void updateViewFromService(){
         String title=musicSrv.getTitle();
 
@@ -263,8 +264,17 @@ public class SongListActivity extends FragmentActivity {
             try {
                 MusicLibrary ml = new MusicLibrary(getApplicationContext());
                 String art=ml.getAlbumArt(musicSrv.getAlbumKey());
+                //Only reload album image if album key changes
                 if(art!=null&&!art.equals("")) {
-                    Bitmap albumart = BitmapFactory.decodeFile(art);
+                    //Load scaled down version of album art to memory
+                    final BitmapFactory.Options options = new BitmapFactory.Options();
+                    options.inJustDecodeBounds = true;
+                    BitmapFactory.decodeFile(art, options);
+                    // Calculate inSampleSize
+                    options.inSampleSize = MusicLibrary.calculateInSampleSize(options, 80, 80);
+                    // Decode bitmap with inSampleSize set
+                    options.inJustDecodeBounds = false;
+                    Bitmap albumart = BitmapFactory.decodeFile(art,options);
                     ImageView albumimage = (ImageView) findViewById(R.id.albumArt);
                     albumimage.setImageBitmap(albumart);
                     Palette.generateAsync(albumart, new Palette.PaletteAsyncListener() {
