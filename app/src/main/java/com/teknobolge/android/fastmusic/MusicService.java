@@ -3,6 +3,7 @@ package com.teknobolge.android.fastmusic;
 /**
  * Created by Oguz Kirat on 2/17/2015.
  */
+import android.app.NotificationManager;
 import android.app.Service;
 
 import java.io.IOException;
@@ -32,6 +33,7 @@ import android.os.PowerManager;
 import android.provider.MediaStore;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
+import android.widget.RemoteViews;
 import android.widget.Toast;
 
 public class MusicService extends Service implements MediaPlayer.OnCompletionListener, MediaPlayer.OnPreparedListener  {
@@ -46,7 +48,8 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
     private boolean shuffle;
     private boolean repeat;
     private boolean prepared=false;
-    private static final int NOTIFY_ID=1;
+    private static final int NOTIFY_ID=1337;
+    private NotificationManager notMgr=null;
 /*
 Service intilaziton and MediaPlayer preperation
  */
@@ -57,6 +60,7 @@ Service intilaziton and MediaPlayer preperation
         IntentFilter filter = new IntentFilter();
         filter.addAction("android.media.AUDIO_BECOMING_NOISY");
         registerReceiver(receiver, filter);
+        notMgr=(NotificationManager)getSystemService(NOTIFICATION_SERVICE);
         seekDuration=10000;
         player = new MediaPlayer() ;
         prepareplayer();
@@ -115,22 +119,44 @@ Service intilaziton and MediaPlayer preperation
         notIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent pendInt = PendingIntent.getActivity(this, 0,
                 notIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        //stop intent will send extra named action which equals stop to MainActivity, then activity will connect to MusicService and call stop(). This method should stop and release MediaPlayer and also clear notifications.
+        Intent stopIntent =  new Intent(this, MainActivity.class);
+        stopIntent.putExtra("action","stop");
+        stopIntent.setData(ContentUris.withAppendedId(Uri.EMPTY, 1));
+        stopIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
+                );
+
+        PendingIntent stopPendingIntent =
+                PendingIntent.getActivity(
+                        this,
+                        0,
+                        stopIntent,
+                        PendingIntent.FLAG_UPDATE_CURRENT
+                );
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(this)
                         .setContentIntent(pendInt)
                         .setSmallIcon(R.drawable.logo_white)
                         .setContentTitle(getTitle())
-                        .setContentText(res.getString(R.string.by)+" "+getArtist())
+
+
+                        .setContentText(res.getString(R.string.by) + " " + getArtist())
+
                         .setOngoing(true)
                         .setTicker(getTitle());
         Notification not= mBuilder.build();
-        startForeground(NOTIFY_ID, not);
+        not.contentView=new RemoteViews(this.getPackageName(),
+                R.layout.notification_songplaying);
+        not.contentView.setTextViewText(R.id.infoSongTitle,getTitle());
+        not.contentView.setTextViewText(R.id.infoAlbumTitle,getArtist());
+        not.contentView.setOnClickPendingIntent(R.id.songinfo,pendInt);
 
-
+       not.contentView.setOnClickPendingIntent(R.id.songcontrols,stopPendingIntent);
+       notMgr.notify(NOTIFY_ID, not);
     }
     @Override
     public void onLowMemory() {
-
+        super.onLowMemory();
     }
     @Override
     public void onCompletion(MediaPlayer mp) {
@@ -184,9 +210,14 @@ Service intilaziton and MediaPlayer preperation
     }
     public  void stop(){
         player.stop();
+
+        release();
+
     }
     public void release(){
         player.release();
+
+        notMgr.cancelAll();
     }
     public  void pause(){
         player.pause();

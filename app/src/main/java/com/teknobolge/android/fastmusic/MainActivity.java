@@ -75,6 +75,15 @@ public class MainActivity extends FragmentActivity {
             musicSrv = binder.getService();
 
             musicBound = true;
+            Bundle extras = getIntent().getExtras();
+            if(extras!=null) {
+                String action = extras.getString("action");
+                if(action.equals("stop"))
+                {
+                    Log.i("FM", "StoppMusic");
+                    musicSrv.stop();
+                }
+            }
             updateViewFromService();
         }
 

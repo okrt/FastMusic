@@ -116,7 +116,7 @@ public class SongListActivity extends FragmentActivity {
             playIntent = new Intent(getApplicationContext(), MusicService.class);
             getApplicationContext().bindService(playIntent, musicConnection, Context.BIND_AUTO_CREATE);
             getApplicationContext().startService(playIntent);
-            // setBarColor(0xFF666666);
+            setBarColor(0xFF666666);
         }
 
     }
