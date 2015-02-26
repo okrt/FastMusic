@@ -324,7 +324,9 @@ Service intilaziton and MediaPlayer preperation
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             if(action.equals("android.media.AUDIO_BECOMING_NOISY")){
-                pause();
+                if(isPlaying()) {
+                    stop();
+                }
             }
 
         }
