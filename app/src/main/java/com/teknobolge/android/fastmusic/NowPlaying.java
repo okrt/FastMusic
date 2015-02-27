@@ -222,8 +222,8 @@ public class NowPlaying extends FragmentActivity {
         ((TextView)findViewById(R.id.infoAlbumTitle)).setText(info);
         if(musicSrv.getAlbumKey()!=null&&!palbumkey.equals(musicSrv.getAlbumKey())) {
             try {
-                MusicLibrary ml = new MusicLibrary(getApplicationContext());
-                String art=ml.getAlbumArt(musicSrv.getAlbumKey());
+
+                String art=MusicLibrary.getAlbumArt(getApplicationContext(),musicSrv.getAlbumKey());
                 if(art!=null&&!art.equals("")) {
                     try{((BitmapDrawable)albumimage.getDrawable()).getBitmap().recycle();
                         albumimage.setImageDrawable(null);}

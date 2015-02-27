@@ -26,11 +26,8 @@ import android.widget.Toast;
 import android.net.Uri;
 import android.database.Cursor;
 public class MusicLibrary {
-    final Context context;
-    public MusicLibrary(final Context context1) {
-        context=context1;
-    }
-    public ArrayList<Song> getSongList(){
+
+    public static ArrayList<Song> getSongList(Context context){
         //şarkıları sorgula
         ArrayList<Song> liste =  new ArrayList<Song>();
         ContentResolver musicResolver;
@@ -61,7 +58,7 @@ public class MusicLibrary {
         }
         return(liste);
     }
-    public ArrayList<Album> getAlbumList(){
+    public static ArrayList<Album> getAlbumList(Context context){
         //şarkıları sorgula
         ArrayList<Album> liste =  new ArrayList<Album>();
         ContentResolver musicResolver;
@@ -94,7 +91,7 @@ public class MusicLibrary {
         }
         return(liste);
     }
-    public String getAlbumArt(String albumkey){
+    public static String getAlbumArt(Context context,String albumkey){
         //şarkıları sorgula
         String albumart=null;
         ContentResolver musicResolver;
@@ -126,7 +123,7 @@ public class MusicLibrary {
         return albumart;
 
     }
-    public ArrayList<Artist> getArtistList(){
+    public static ArrayList<Artist> getArtistList(Context context){
         //şarkıları sorgula
         ArrayList<Artist> liste =  new ArrayList<Artist>();
         ContentResolver musicResolver;

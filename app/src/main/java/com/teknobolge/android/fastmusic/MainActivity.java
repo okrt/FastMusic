@@ -204,8 +204,8 @@ public class MainActivity extends FragmentActivity {
         ((TextView)findViewById(R.id.infoAlbumTitle)).setText(info);
         if(musicSrv.getAlbumKey()!=null&&!palbumkey.equals(musicSrv.getAlbumKey())) {
             try {
-                MusicLibrary ml = new MusicLibrary(getApplicationContext());
-                String art=ml.getAlbumArt(musicSrv.getAlbumKey());
+
+                String art=MusicLibrary.getAlbumArt(getApplicationContext(),musicSrv.getAlbumKey());
                 //Only reload album image if album key changes
                 if(art!=null&&!art.equals("")) {
                     //Load scaled down version of album art to memory

@@ -146,9 +146,9 @@ public class SongListActivity extends FragmentActivity {
         String type = extras.getString("type");
         if(type.equals("songsofalbum")) {
             String albumkey = extras.getString("key");
-            MusicLibrary ml = new MusicLibrary(getApplicationContext());
+
             final ArrayList<Song> songlist = new ArrayList<Song>();
-            final ArrayList<Song> arrLAlbums = ml.getSongList();
+            final ArrayList<Song> arrLAlbums = MusicLibrary.getSongList(getApplicationContext());
             for (Song item : arrLAlbums) {
                 if (albumkey.equals(item.albumkey)) {
                     songlist.add(item);
@@ -174,9 +174,8 @@ public class SongListActivity extends FragmentActivity {
         }
         else if(type.equals("albumsofartist")){
             String artistkey = extras.getString("key");
-            MusicLibrary ml = new MusicLibrary(getApplicationContext());
             final ArrayList<Album> albumlist = new ArrayList<Album>();
-            final ArrayList<Album> arrLAlbums = ml.getAlbumList();
+            final ArrayList<Album> arrLAlbums = MusicLibrary.getAlbumList(getApplicationContext());
             for (Album item : arrLAlbums) {
                 if (artistkey.equals(item.albumartist)) {
 
@@ -262,8 +261,8 @@ public class SongListActivity extends FragmentActivity {
         ((TextView)findViewById(R.id.infoAlbumTitle)).setText(info);
         if(musicSrv.getAlbumKey()!=null&&!palbumkey.equals(musicSrv.getAlbumKey())) {
             try {
-                MusicLibrary ml = new MusicLibrary(getApplicationContext());
-                String art=ml.getAlbumArt(musicSrv.getAlbumKey());
+
+                String art=MusicLibrary.getAlbumArt(getApplicationContext(),musicSrv.getAlbumKey());
                 //Only reload album image if album key changes
                 if(art!=null&&!art.equals("")) {
                     //Load scaled down version of album art to memory

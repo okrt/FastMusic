@@ -89,9 +89,9 @@ public class LibraryFragment extends Fragment {
         getActivity().startService(servicestart);
         View sarkilar = inflater.inflate(R.layout.fragment_library, container, false);
         ListView listemiz = (ListView)sarkilar.findViewById(R.id.list1);
-        MusicLibrary ml=new MusicLibrary(getActivity().getApplicationContext());
+
         if(position==0){
-            final ArrayList<Artist> arrLArtists=ml.getArtistList();
+            final ArrayList<Artist> arrLArtists=MusicLibrary.getArtistList(getActivity().getApplicationContext());
             ArtistAdapter adapter = new ArtistAdapter(getActivity(), arrLArtists);
             listemiz.setAdapter(adapter);
             listemiz.setOnItemClickListener(new OnItemClickListener()
@@ -111,7 +111,7 @@ public class LibraryFragment extends Fragment {
             });
         }
         else if(position==1){
-            final ArrayList<Album> arrLAlbums=ml.getAlbumList();
+            final ArrayList<Album> arrLAlbums=MusicLibrary.getAlbumList(getActivity().getApplicationContext());
             Collections.sort(arrLAlbums, new Comparator<Album>(){
                 public int compare(Album s1, Album s2) {
                     return s1.albumtitle.compareToIgnoreCase(s2.albumtitle);
@@ -135,7 +135,7 @@ public class LibraryFragment extends Fragment {
                 }
             });
         }else {
-            final ArrayList<Song> arrLSongs = ml.getSongList();
+            final ArrayList<Song> arrLSongs = MusicLibrary.getSongList(getActivity().getApplicationContext());
             Collections.sort(arrLSongs, new Comparator<Song>(){
                 public int compare(Song s1, Song s2) {
                     return s1.title.compareToIgnoreCase(s2.title);
