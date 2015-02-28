@@ -89,7 +89,7 @@ public class LibraryFragment extends Fragment {
         getActivity().startService(servicestart);
         View sarkilar = inflater.inflate(R.layout.fragment_library, container, false);
         ListView listemiz = (ListView)sarkilar.findViewById(R.id.list1);
-
+        //List artists
         if(position==0){
             final ArrayList<Artist> arrLArtists=MusicLibrary.getArtistList(getActivity().getApplicationContext());
             ArtistAdapter adapter = new ArtistAdapter(getActivity(), arrLArtists);

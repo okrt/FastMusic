@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
+
 import android.content.Context;
 import android.graphics.BitmapFactory;
 import android.provider.MediaStore;
@@ -28,7 +30,7 @@ import android.database.Cursor;
 public class MusicLibrary {
 
     public static ArrayList<Song> getSongList(Context context){
-        //şarkıları sorgula
+        //Get song list from device
         ArrayList<Song> liste =  new ArrayList<Song>();
         ContentResolver musicResolver;
 
@@ -59,7 +61,7 @@ public class MusicLibrary {
         return(liste);
     }
     public static ArrayList<Album> getAlbumList(Context context){
-        //şarkıları sorgula
+        // Get album list from device
         ArrayList<Album> liste =  new ArrayList<Album>();
         ContentResolver musicResolver;
 
@@ -92,7 +94,7 @@ public class MusicLibrary {
         return(liste);
     }
     public static String getAlbumArt(Context context,String albumkey){
-        //şarkıları sorgula
+        // Get cached album art based on album key
         String albumart=null;
         ContentResolver musicResolver;
 
@@ -124,7 +126,7 @@ public class MusicLibrary {
 
     }
     public static ArrayList<Artist> getArtistList(Context context){
-        //şarkıları sorgula
+        //Get artist list from device
         ArrayList<Artist> liste =  new ArrayList<Artist>();
         ContentResolver musicResolver;
 
@@ -156,6 +158,33 @@ public class MusicLibrary {
             while (musicCursor.moveToNext());
         }
         return(liste);
+    }
+
+    public static ArrayList<Artist> getArtistListFromSongs(Context context){
+        ArrayList<Artist> liste =  new ArrayList<Artist>();
+        ArrayList<Song> allsongs=getSongList(context);
+        for (Song item : allsongs) {
+            Artist thisartist=new Artist(item.artistkey,item.artist,"-","-");
+            if(!liste.contains(thisartist))
+            {
+                liste.add(thisartist);
+            }
+        }
+
+        return liste;
+    }
+    public static ArrayList<Album> getAlbumListFromSongs(Context context){
+        ArrayList<Album> liste =  new ArrayList<Album>();
+        ArrayList<Song> allsongs=getSongList(context);
+        for (Song item : allsongs) {
+            Album thisalbum=new Album(item.albumkey,item.album, item.artist);
+            if(!liste.contains(thisalbum))
+            {
+                liste.add(thisalbum);
+            }
+        }
+
+        return liste;
     }
     public static int calculateInSampleSize(
             BitmapFactory.Options options, int reqWidth, int reqHeight) {

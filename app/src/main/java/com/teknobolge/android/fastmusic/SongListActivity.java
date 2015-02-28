@@ -145,6 +145,7 @@ public class SongListActivity extends FragmentActivity {
         Bundle extras = getIntent().getExtras();
         String type = extras.getString("type");
         if(type.equals("songsofalbum")) {
+            //List songs of an album
             String albumkey = extras.getString("key");
 
             final ArrayList<Song> songlist = new ArrayList<Song>();
@@ -175,7 +176,7 @@ public class SongListActivity extends FragmentActivity {
         else if(type.equals("albumsofartist")){
             String artistkey = extras.getString("key");
             final ArrayList<Album> albumlist = new ArrayList<Album>();
-            final ArrayList<Album> arrLAlbums = MusicLibrary.getAlbumList(getApplicationContext());
+            final ArrayList<Album> arrLAlbums = MusicLibrary.getAlbumListFromSongs(getApplicationContext());
             for (Album item : arrLAlbums) {
                 if (artistkey.equals(item.albumartist)) {
 

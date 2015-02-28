@@ -19,4 +19,17 @@ public class Artist {
         this.numberoftracks=numberoftracks;
 
     }
+    @Override
+    public boolean equals (Object object) {
+        boolean result = false;
+        if (object == null) {
+            result = false;
+        } else {
+            Artist a = (Artist) object;
+            if (this.artistkey.equals(a.artistkey)) {
+                result = true;
+            }
+        }
+        return result;
+    }
 }

@@ -22,5 +22,18 @@ public class Song {
         this.trackid=trackid;
 
     }
+    @Override
+    public boolean equals (Object object) {
+        boolean result = false;
+        if (object == null) {
+            result = false;
+        } else {
+            Song a = (Song) object;
+            if (this.songid == a.songid) {
+                result = true;
+            }
+        }
+        return result;
+    }
 
 }

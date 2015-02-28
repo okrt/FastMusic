@@ -15,4 +15,17 @@ public class Album {
         this.albumartist=albumartist;
 
     }
+    @Override
+    public boolean equals (Object object) {
+        boolean result = false;
+        if (object == null) {
+            result = false;
+        } else {
+            Album a = (Album) object;
+            if (this.albumkey.equals(a.albumkey)) {
+                result = true;
+            }
+        }
+        return result;
+    }
 }

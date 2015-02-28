@@ -75,15 +75,23 @@ public class MainActivity extends FragmentActivity {
             musicSrv = binder.getService();
 
             musicBound = true;
-            Bundle extras = getIntent().getExtras();
-            if(extras!=null) {
-                String action = extras.getString("action");
-                if(action.equals("stop"))
-                {
-                    Log.i("FM", "StoppMusic");
-                    musicSrv.stop();
+            try {
+                Bundle extras = getIntent().getExtras();
+                if (extras != null) {
+                    String action = extras.getString("action");
+                    if (action != null && action.equals("stop")) {
+                        Log.i("FM", "StoppMusic");
+                        musicSrv.stop();
+                    }
                 }
             }
+            catch(Exception e)
+            {
+
+                Log.e("FastMusic", "Problem with getting intent");
+                e.printStackTrace();
+            }
+
             updateViewFromService();
         }
 
