@@ -42,6 +42,7 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
     private Resources res;
     private long currentSongID;
     private int currentPos;
+    private AudioManager.OnAudioFocusChangeListener amOnAudioFocusChange;
     private ArrayList<Song> songList = new ArrayList<Song>();
     private final IBinder musicBind = new MusicBinder();
     private int seekDuration;
@@ -112,8 +113,49 @@ Service intilaziton and MediaPlayer preperation
     }
     public void onPrepared(MediaPlayer mp) {
         prepared=true;
-        //start playback
-        mp.start();
+        amOnAudioFocusChange = new AudioManager.OnAudioFocusChangeListener() {
+
+            @Override
+            public void onAudioFocusChange(int focusChange) {
+                switch (focusChange) {
+                    case AudioManager.AUDIOFOCUS_GAIN:
+                        Log.i(TAG, "AUDIOFOCUS_GAIN");
+                        // Set volume level to desired levels
+                        start();
+                        break;
+                    case AudioManager.AUDIOFOCUS_GAIN_TRANSIENT:
+                        Log.i(TAG, "AUDIOFOCUS_GAIN_TRANSIENT");
+                        // You have audio focus for a short time
+                        start();
+                        break;
+                    case AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK:
+                        Log.i(TAG, "AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK");
+                        // Play over existing audio
+                        start();
+                        break;
+                    case AudioManager.AUDIOFOCUS_LOSS:
+                        Log.e(TAG, "AUDIOFOCUS_LOSS");
+                        stop();
+                        break;
+                    case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
+                        Log.e(TAG, "AUDIOFOCUS_LOSS_TRANSIENT");
+                        // Temporary loss of audio focus - expect to get it back - you can keep your resources around
+                        stop();
+                        break;
+                    case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
+                        Log.e(TAG, "AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK");
+                        start();
+                        break;
+                }
+            }
+        };
+        AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        int result = am.requestAudioFocus(amOnAudioFocusChange, AudioManager.STREAM_MUSIC,
+                AudioManager.AUDIOFOCUS_GAIN);
+        if(result != AudioManager.AUDIOFOCUS_REQUEST_GRANTED)
+        {
+            Log.e("FastMusic","Cant get audio focus");
+        }
         //notification
         Intent notIntent = new Intent(getApplicationContext(), MainActivity.class);
         notIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
