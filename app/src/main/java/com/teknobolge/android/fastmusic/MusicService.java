@@ -47,6 +47,7 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
     private final IBinder musicBind = new MusicBinder();
     private int seekDuration;
     AudioManager am;
+    boolean userstopped;
     private boolean shuffle;
     private boolean repeat;
     private boolean prepared=false;
@@ -66,6 +67,7 @@ Service intilaziton and MediaPlayer preperation
         seekDuration=10000;
         player = new MediaPlayer() ;
         prepareplayer();
+        userstopped=true;
         amOnAudioFocusChange = new AudioManager.OnAudioFocusChangeListener() {
 
             @Override
@@ -74,29 +76,43 @@ Service intilaziton and MediaPlayer preperation
                     case AudioManager.AUDIOFOCUS_GAIN:
                         Log.i(TAG, "AUDIOFOCUS_GAIN");
                         // Set volume level to desired levels
-                        player.start();
+                        if(userstopped==false)
+                        {
+                            player.start();
+                            }
                         break;
                     case AudioManager.AUDIOFOCUS_GAIN_TRANSIENT:
                         Log.i(TAG, "AUDIOFOCUS_GAIN_TRANSIENT");
                         // You have audio focus for a short time
-                        player.start();
+                        if(!userstopped)
+                        {
+                            player.start();
+
+                        }
                         break;
                     case AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK:
                         Log.i(TAG, "AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK");
                         // Play over existing audio
-                        player.start();
+                        if(!userstopped)
+                        {
+                            player.start();
+
+                        }
                         break;
                     case AudioManager.AUDIOFOCUS_LOSS:
                         Log.e(TAG, "AUDIOFOCUS_LOSS");
+
                         player.pause();
                         break;
                     case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
                         Log.e(TAG, "AUDIOFOCUS_LOSS_TRANSIENT");
                         // Temporary loss of audio focus - expect to get it back - you can keep your resources around
+
                         player.pause();
                         break;
                     case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
                         Log.e(TAG, "AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK");
+
                         player.pause();
                         break;
                 }
@@ -244,6 +260,7 @@ Service intilaziton and MediaPlayer preperation
         am.requestAudioFocus(amOnAudioFocusChange, AudioManager.STREAM_MUSIC,
                 AudioManager.AUDIOFOCUS_GAIN);
         player.start();
+        userstopped=false;
 
     }
 
@@ -267,10 +284,12 @@ Service intilaziton and MediaPlayer preperation
     }
     public  void pause(){
         player.pause();
+        userstopped=true;
     }
     public  void start(){
         if(prepared) {
             player.start();
+            userstopped=false;
         }
         else
         {
@@ -371,6 +390,7 @@ Service intilaziton and MediaPlayer preperation
             String action = intent.getAction();
             if(action.equals("android.media.AUDIO_BECOMING_NOISY")){
                 if(isPlaying()) {
+                    userstopped=true;
                     stop();
                 }
             }
