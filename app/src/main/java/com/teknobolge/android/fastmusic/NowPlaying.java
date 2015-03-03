@@ -125,20 +125,37 @@ public class NowPlaying extends FragmentActivity {
         }
 
     }
+    public void recycleAlbumArt(){
+        try{((BitmapDrawable)albumimage.getDrawable()).getBitmap().recycle();
+            albumimage.setImageDrawable(null);
+            albumart.recycle();
+        }
 
+        catch(NullPointerException ex){
+            ex.printStackTrace();
+        }
+    }
     @Override
     public void onPause(){
         super.onPause();
+        recycleAlbumArt();
         palbumkey="";
-        ((BitmapDrawable)albumimage.getDrawable()).getBitmap().recycle();
-        albumimage.setImageDrawable(null);
-        try {
-            albumart.recycle();
-        }
-        catch(NullPointerException e)
-        {
 
-        }
+
+    }
+    @Override
+    public void onResume(){
+        super.onResume();
+        try{albumart.recycle();}catch (NullPointerException e){}
+
+
+    }
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+        recycleAlbumArt();
+
+
     }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -165,7 +182,7 @@ public class NowPlaying extends FragmentActivity {
         //tabs.setViewPager(pager);
 
 
-        }
+    }
 
 
     @Override
@@ -195,6 +212,7 @@ public class NowPlaying extends FragmentActivity {
             updateViewFromService();
         }
     };
+
     public void updateViewFromService(){
         String title=musicSrv.getTitle();
 
@@ -221,27 +239,22 @@ public class NowPlaying extends FragmentActivity {
         ((TextView)findViewById(R.id.infoSongTitle)).setText(title);
         ((TextView)findViewById(R.id.infoAlbumTitle)).setText(info);
         if(musicSrv.getAlbumKey()!=null&&!palbumkey.equals(musicSrv.getAlbumKey())) {
+            DisplayMetrics displayMetrics = new DisplayMetrics();
+            WindowManager wm = (WindowManager) getApplicationContext().getSystemService(Context.WINDOW_SERVICE);
+            wm.getDefaultDisplay().getMetrics(displayMetrics);
+            int s=MusicLibrary.getMax(displayMetrics.widthPixels, displayMetrics.heightPixels);
+            recycleAlbumArt();
             try {
 
                 String art=MusicLibrary.getAlbumArt(getApplicationContext(),musicSrv.getAlbumKey());
                 if(art!=null&&!art.equals("")) {
-                    try{((BitmapDrawable)albumimage.getDrawable()).getBitmap().recycle();
-                        albumimage.setImageDrawable(null);}
-                    catch(NullPointerException ex){
-                        ex.printStackTrace();
-                    }
                     final BitmapFactory.Options options = new BitmapFactory.Options();
                     options.inJustDecodeBounds = true;
                     BitmapFactory.decodeFile(art, options);
-                    DisplayMetrics displayMetrics = new DisplayMetrics();
-                    WindowManager wm = (WindowManager) getApplicationContext().getSystemService(Context.WINDOW_SERVICE);
-                    wm.getDefaultDisplay().getMetrics(displayMetrics);
-                    int s=MusicLibrary.getMax(displayMetrics.widthPixels, displayMetrics.heightPixels);
-                    // Calculate inSampleSize
                     options.inSampleSize = MusicLibrary.calculateInSampleSize(options, s, s);
-                    // Decode bitmap with inSampleSize set
                     options.inJustDecodeBounds = false;
-                    Bitmap albumart = BitmapFactory.decodeFile(art,options);
+                    try{albumart.recycle();}catch (NullPointerException e){}
+                    albumart = BitmapFactory.decodeFile(art,options);
 
                     albumimage.setImageBitmap(albumart);
 
@@ -266,11 +279,29 @@ public class NowPlaying extends FragmentActivity {
 
                 }
                 else{
-                    albumimage.setImageResource(R.drawable.ic_launcher);}
+                    final BitmapFactory.Options options = new BitmapFactory.Options();
+                    options.inJustDecodeBounds = true;
+                    BitmapFactory.decodeResource(getApplicationContext().getResources(),R.drawable.cover_logo,options);
+                    options.inSampleSize = MusicLibrary.calculateInSampleSize(options, s, s);
+                    options.inJustDecodeBounds = false;
+                    try{albumart.recycle();}catch (NullPointerException e){}
+                    albumart=BitmapFactory.decodeResource(getApplicationContext().getResources(),R.drawable.cover_logo,options);
+
+
+                    albumimage.setImageBitmap(albumart);
+
+                }
 
             } catch (Exception ex) {
 
-                albumimage.setImageResource(R.drawable.ic_launcher);
+                final BitmapFactory.Options options = new BitmapFactory.Options();
+                options.inJustDecodeBounds = true;
+                BitmapFactory.decodeResource(getApplicationContext().getResources(),R.drawable.cover_logo,options);
+                options.inSampleSize = MusicLibrary.calculateInSampleSize(options, s, s);
+                options.inJustDecodeBounds = false;
+                try{albumart.recycle();}catch (NullPointerException e){}
+                albumart=BitmapFactory.decodeResource(getApplicationContext().getResources(),R.drawable.cover_logo,options);
+                albumimage.setImageBitmap(albumart);
             }
             palbumkey=musicSrv.getAlbumKey();
         }

@@ -62,6 +62,9 @@ public class SongListActivity extends FragmentActivity {
     private Intent playIntent;
     //binding
     private boolean musicBound=false;
+    boolean donotrefresh=false;
+    private Bitmap albumart;
+    private ImageView albumimage;
 
     //controller
 
@@ -129,7 +132,7 @@ public class SongListActivity extends FragmentActivity {
         tabs = (PagerSlidingTabStrip) findViewById(R.id.tabs);
         //pager = (ViewPager) findViewById(R.id.pager);
         adapter = new MyPagerAdapter(getSupportFragmentManager());
-
+        albumimage = (ImageView) findViewById(R.id.albumArt);
 //        pager.setAdapter(adapter);
 
         final int pageMargin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4, getResources()
@@ -234,7 +237,51 @@ public class SongListActivity extends FragmentActivity {
             updateViewFromService();
         }
     };
+    public void recycleAlbumArt(){
+        try{
+            //Bitmap bitmap = ((BitmapDrawable) albumimage.getDrawable()).getBitmap();
+            // albumimage.setImageDrawable(null);
+            //bitmap.recycle();
+            //albumart.recycle();
+            albumart=BitmapFactory.decodeResource(getApplicationContext().getResources(),R.drawable.pixel);
+            albumimage.setImageBitmap(albumart);
+        }
 
+        catch(NullPointerException ex){
+            ex.printStackTrace();
+        }
+    }
+    @Override
+    public void onPause(){
+        super.onPause();
+        donotrefresh=true;
+        recycleAlbumArt();
+        albumart=BitmapFactory.decodeResource(getApplicationContext().getResources(),R.drawable.pixel);
+        albumimage.setImageBitmap(albumart);
+
+    }
+    @Override
+    public void onResume(){
+        super.onResume();
+        palbumkey="";
+        donotrefresh=false;
+        updateViewHandler.postDelayed(run, 1000);
+        // recycleAlbumArt();
+
+
+    }
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+
+    }
+    @Override
+    public void onStop(){
+        super.onStop();
+        donotrefresh=true;
+        recycleAlbumArt();
+
+    }
     public void updateViewFromService(){
         String title=musicSrv.getTitle();
 
@@ -251,7 +298,7 @@ public class SongListActivity extends FragmentActivity {
             album=musicSrv.getAlbum();
             artist=musicSrv.getArtist();
             if(title.length()>40)
-            title=title.substring(0,40)+"...";
+                title=title.substring(0,40)+"...";
             if(album.length()>20)
                 album=album.substring(0,20)+"...";
             if(artist.length()>20)
@@ -260,23 +307,23 @@ public class SongListActivity extends FragmentActivity {
         }
         ((TextView)findViewById(R.id.infoSongTitle)).setText(title);
         ((TextView)findViewById(R.id.infoAlbumTitle)).setText(info);
+        int s=160;
         if(musicSrv.getAlbumKey()!=null&&!palbumkey.equals(musicSrv.getAlbumKey())) {
+
             try {
 
                 String art=MusicLibrary.getAlbumArt(getApplicationContext(),musicSrv.getAlbumKey());
-                //Only reload album image if album key changes
                 if(art!=null&&!art.equals("")) {
-                    //Load scaled down version of album art to memory
                     final BitmapFactory.Options options = new BitmapFactory.Options();
                     options.inJustDecodeBounds = true;
                     BitmapFactory.decodeFile(art, options);
-                    // Calculate inSampleSize
-                    options.inSampleSize = MusicLibrary.calculateInSampleSize(options, 80, 80);
-                    // Decode bitmap with inSampleSize set
+                    options.inSampleSize = MusicLibrary.calculateInSampleSize(options, s, s);
                     options.inJustDecodeBounds = false;
-                    Bitmap albumart = BitmapFactory.decodeFile(art,options);
-                    ImageView albumimage = (ImageView) findViewById(R.id.albumArt);
+                    try{recycleAlbumArt();}catch (NullPointerException e){}
+                    albumart = BitmapFactory.decodeFile(art, options);
+
                     albumimage.setImageBitmap(albumart);
+
                     Palette.generateAsync(albumart, new Palette.PaletteAsyncListener() {
                         public void onGenerated(Palette palette) {
                             int renk;
@@ -290,18 +337,35 @@ public class SongListActivity extends FragmentActivity {
                             }
                             setBarColor(renk);
                             changeColor(renk);
-                            String tcolor="#AA"+String.format("%06X", 0xFFFFFF & renk);
+
+                            String tcolor="#80"+String.format("%06X", 0xFFFFFF & renk);
                             rlControlsBg.setBackgroundColor(Color.parseColor(tcolor));
                         }
                     });
 
                 }
-                else{ImageView albumimage = (ImageView) findViewById(R.id.albumArt);
-                    albumimage.setImageResource(R.drawable.ic_launcher);}
+                else{
+                    final BitmapFactory.Options options = new BitmapFactory.Options();
+                    options.inJustDecodeBounds = true;
+                    BitmapFactory.decodeResource(getApplicationContext().getResources(),R.drawable.cover_logo,options);
+                    options.inSampleSize = MusicLibrary.calculateInSampleSize(options, s, s);
+                    options.inJustDecodeBounds = false;
+                    albumart=BitmapFactory.decodeResource(getApplicationContext().getResources(),R.drawable.cover_logo,options);
+
+
+                    albumimage.setImageBitmap(albumart);
+
+                }
 
             } catch (Exception ex) {
-                ImageView albumimage = (ImageView) findViewById(R.id.albumArt);
-                albumimage.setImageResource(R.drawable.ic_launcher);
+
+                final BitmapFactory.Options options = new BitmapFactory.Options();
+                options.inJustDecodeBounds = true;
+                BitmapFactory.decodeResource(getApplicationContext().getResources(),R.drawable.cover_logo,options);
+                options.inSampleSize = MusicLibrary.calculateInSampleSize(options, s, s);
+                options.inJustDecodeBounds = false;
+                albumart=BitmapFactory.decodeResource(getApplicationContext().getResources(),R.drawable.cover_logo,options);
+                albumimage.setImageBitmap(albumart);
             }
             palbumkey=musicSrv.getAlbumKey();
         }
@@ -313,7 +377,9 @@ public class SongListActivity extends FragmentActivity {
             if(playing!=0)
                 imgvStop.setImageResource(R.drawable.play);
         }
-        updateViewHandler.postDelayed(run, 1000);
+        if(!donotrefresh) {
+            updateViewHandler.postDelayed(run, 1000);
+        }
     }
     public void changeColor(int newColor) {
 

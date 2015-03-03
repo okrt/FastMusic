@@ -8,6 +8,7 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
@@ -22,6 +23,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.graphics.Palette;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Menu;
@@ -41,16 +43,16 @@ import java.util.ArrayList;
 
 public class MainActivity extends FragmentActivity {
 
-	private final Handler handler = new Handler();
+    private final Handler handler = new Handler();
     private Resources res;
-	private PagerSlidingTabStrip tabs;
+    private PagerSlidingTabStrip tabs;
     private RelativeLayout rlControlsBg;
     private String palbumkey="";
-	private ViewPager pager;
-	private MyPagerAdapter adapter;
+    private ViewPager pager;
+    private MyPagerAdapter adapter;
     private ImageView imgvStop;
-	private Drawable oldBackground = null;
-	private int currentColor = 0xFF666666;
+    private Drawable oldBackground = null;
+    private int currentColor = 0xFF666666;
     public ArrayList<String> songList;
     private ListView songView;
     String[] sarkilarlistesi;
@@ -59,6 +61,9 @@ public class MainActivity extends FragmentActivity {
     private Intent playIntent;
     //binding
     private boolean musicBound=false;
+    private Bitmap albumart;
+    private ImageView albumimage;
+    boolean donotrefresh=false;
 
     //controller
 
@@ -122,62 +127,110 @@ public class MainActivity extends FragmentActivity {
         }
 
     }
+
+    public void recycleAlbumArt(){
+        try{
+            //Bitmap bitmap = ((BitmapDrawable) albumimage.getDrawable()).getBitmap();
+           // albumimage.setImageDrawable(null);
+            //bitmap.recycle();
+            //albumart.recycle();
+            albumart=BitmapFactory.decodeResource(getApplicationContext().getResources(),R.drawable.pixel);
+            albumimage.setImageBitmap(albumart);
+        }
+
+        catch(NullPointerException ex){
+            ex.printStackTrace();
+        }
+    }
     @Override
     public void onStart() {
         super.onStart();
         res=getResources();
+
         if(playIntent==null){
             playIntent = new Intent(getApplicationContext(), MusicService.class);
             getApplicationContext().bindService(playIntent, musicConnection, Context.BIND_AUTO_CREATE);
             getApplicationContext().startService(playIntent);
             setBarColor(0xFF666666);
         }
+        palbumkey="";
+
+    }
+    @Override
+    public void onPause(){
+        super.onPause();
+        donotrefresh=true;
+        recycleAlbumArt();
+        albumart=BitmapFactory.decodeResource(getApplicationContext().getResources(),R.drawable.pixel);
+        albumimage.setImageBitmap(albumart);
+
+    }
+    @Override
+    public void onResume(){
+        super.onResume();
+        palbumkey="";
+        donotrefresh=false;
+        updateViewHandler.postDelayed(run, 1000);
+        // recycleAlbumArt();
+
+
+    }
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+
+    }
+    @Override
+    public void onStop(){
+        super.onStop();
+        donotrefresh=true;
+        recycleAlbumArt();
 
     }
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_main);
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
 
-		tabs = (PagerSlidingTabStrip) findViewById(R.id.tabs);
-		pager = (ViewPager) findViewById(R.id.pager);
-		adapter = new MyPagerAdapter(getSupportFragmentManager());
+        tabs = (PagerSlidingTabStrip) findViewById(R.id.tabs);
+        pager = (ViewPager) findViewById(R.id.pager);
+        adapter = new MyPagerAdapter(getSupportFragmentManager());
         rlControlsBg=(RelativeLayout)findViewById(R.id.controlsbg);
-		pager.setAdapter(adapter);
+        pager.setAdapter(adapter);
+        albumimage = (ImageView) findViewById(R.id.albumArt);
+        final int pageMargin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4, getResources()
+                .getDisplayMetrics());
+        pager.setPageMargin(pageMargin);
 
-		final int pageMargin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4, getResources()
-				.getDisplayMetrics());
-		pager.setPageMargin(pageMargin);
-
-		tabs.setViewPager(pager);
+        tabs.setViewPager(pager);
         imgvStop=(ImageView)findViewById(R.id.stop);
-		changeColor(currentColor);
+        changeColor(currentColor);
         Intent servicestart = new Intent(this, MusicService.class);
         startService(servicestart);
 
-	}
+    }
 
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.main, menu);
-		return true;
-	}
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main, menu);
+        return true;
+    }
 
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
 
-		switch (item.getItemId()) {
+        switch (item.getItemId()) {
 
-		case R.id.action_contact:
-			QuickContactFragment dialog = new QuickContactFragment();
-			dialog.show(getSupportFragmentManager(), "QuickContactFragment");
-			return true;
+            case R.id.action_contact:
+                QuickContactFragment dialog = new QuickContactFragment();
+                dialog.show(getSupportFragmentManager(), "QuickContactFragment");
+                return true;
 
-		}
+        }
 
-		return super.onOptionsItemSelected(item);
-	}
+        return super.onOptionsItemSelected(item);
+    }
     Runnable run = new Runnable() {
 
         @Override
@@ -210,23 +263,23 @@ public class MainActivity extends FragmentActivity {
         }
         ((TextView)findViewById(R.id.infoSongTitle)).setText(title);
         ((TextView)findViewById(R.id.infoAlbumTitle)).setText(info);
+        int s=160;
         if(musicSrv.getAlbumKey()!=null&&!palbumkey.equals(musicSrv.getAlbumKey())) {
+
             try {
 
                 String art=MusicLibrary.getAlbumArt(getApplicationContext(),musicSrv.getAlbumKey());
-                //Only reload album image if album key changes
                 if(art!=null&&!art.equals("")) {
-                    //Load scaled down version of album art to memory
                     final BitmapFactory.Options options = new BitmapFactory.Options();
                     options.inJustDecodeBounds = true;
                     BitmapFactory.decodeFile(art, options);
-                    // Calculate inSampleSize
-                    options.inSampleSize = MusicLibrary.calculateInSampleSize(options, 80, 80);
-                    // Decode bitmap with inSampleSize set
+                    options.inSampleSize = MusicLibrary.calculateInSampleSize(options, s, s);
                     options.inJustDecodeBounds = false;
-                    Bitmap albumart = BitmapFactory.decodeFile(art,options);
-                    ImageView albumimage = (ImageView) findViewById(R.id.albumArt);
+                    try{recycleAlbumArt();}catch (NullPointerException e){}
+                    albumart = BitmapFactory.decodeFile(art, options);
+
                     albumimage.setImageBitmap(albumart);
+
                     Palette.generateAsync(albumart, new Palette.PaletteAsyncListener() {
                         public void onGenerated(Palette palette) {
                             int renk;
@@ -240,18 +293,35 @@ public class MainActivity extends FragmentActivity {
                             }
                             setBarColor(renk);
                             changeColor(renk);
-                            String tcolor="#AA"+String.format("%06X", 0xFFFFFF & renk);
+
+                            String tcolor="#80"+String.format("%06X", 0xFFFFFF & renk);
                             rlControlsBg.setBackgroundColor(Color.parseColor(tcolor));
                         }
                     });
 
                 }
-                else{ImageView albumimage = (ImageView) findViewById(R.id.albumArt);
-                    albumimage.setImageResource(R.drawable.ic_launcher);}
+                else{
+                    final BitmapFactory.Options options = new BitmapFactory.Options();
+                    options.inJustDecodeBounds = true;
+                    BitmapFactory.decodeResource(getApplicationContext().getResources(),R.drawable.cover_logo,options);
+                    options.inSampleSize = MusicLibrary.calculateInSampleSize(options, s, s);
+                    options.inJustDecodeBounds = false;
+                    albumart=BitmapFactory.decodeResource(getApplicationContext().getResources(),R.drawable.cover_logo,options);
+
+
+                    albumimage.setImageBitmap(albumart);
+
+                }
 
             } catch (Exception ex) {
-                ImageView albumimage = (ImageView) findViewById(R.id.albumArt);
-                albumimage.setImageResource(R.drawable.ic_launcher);
+
+                final BitmapFactory.Options options = new BitmapFactory.Options();
+                options.inJustDecodeBounds = true;
+                BitmapFactory.decodeResource(getApplicationContext().getResources(),R.drawable.cover_logo,options);
+                options.inSampleSize = MusicLibrary.calculateInSampleSize(options, s, s);
+                options.inJustDecodeBounds = false;
+                albumart=BitmapFactory.decodeResource(getApplicationContext().getResources(),R.drawable.cover_logo,options);
+                albumimage.setImageBitmap(albumart);
             }
             palbumkey=musicSrv.getAlbumKey();
         }
@@ -263,62 +333,64 @@ public class MainActivity extends FragmentActivity {
             if(playing!=0)
                 imgvStop.setImageResource(R.drawable.play);
         }
-        updateViewHandler.postDelayed(run, 1000);
+        if(!donotrefresh) {
+            updateViewHandler.postDelayed(run, 1000);
+        }
     }
-	public void changeColor(int newColor) {
+    public void changeColor(int newColor) {
 
-		tabs.setIndicatorColor(newColor);
+        tabs.setIndicatorColor(newColor);
 
-		// change ActionBar color just if an ActionBar is available
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+        // change ActionBar color just if an ActionBar is available
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
 
-			Drawable colorDrawable = new ColorDrawable(newColor);
-			Drawable bottomDrawable = getResources().getDrawable(R.drawable.actionbar_bottom);
-			LayerDrawable ld = new LayerDrawable(new Drawable[] { colorDrawable, bottomDrawable });
+            Drawable colorDrawable = new ColorDrawable(newColor);
+            Drawable bottomDrawable = getResources().getDrawable(R.drawable.actionbar_bottom);
+            LayerDrawable ld = new LayerDrawable(new Drawable[] { colorDrawable, bottomDrawable });
 
-			if (oldBackground == null) {
+            if (oldBackground == null) {
 
-				if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
-					ld.setCallback(drawableCallback);
-				} else {
-					getActionBar().setBackgroundDrawable(ld);
-				}
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                    ld.setCallback(drawableCallback);
+                } else {
+                    getActionBar().setBackgroundDrawable(ld);
+                }
 
-			} else {
+            } else {
 
-				TransitionDrawable td = new TransitionDrawable(new Drawable[] { oldBackground, ld });
+                TransitionDrawable td = new TransitionDrawable(new Drawable[] { oldBackground, ld });
 
-				// workaround for broken ActionBarContainer drawable handling on
-				// pre-API 17 builds
-				// https://github.com/android/platform_frameworks_base/commit/a7cc06d82e45918c37429a59b14545c6a57db4e4
-				if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
-					td.setCallback(drawableCallback);
-				} else {
-					getActionBar().setBackgroundDrawable(td);
-				}
+                // workaround for broken ActionBarContainer drawable handling on
+                // pre-API 17 builds
+                // https://github.com/android/platform_frameworks_base/commit/a7cc06d82e45918c37429a59b14545c6a57db4e4
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                    td.setCallback(drawableCallback);
+                } else {
+                    getActionBar().setBackgroundDrawable(td);
+                }
 
-				td.startTransition(200);
+                td.startTransition(200);
 
-			}
+            }
 
-			oldBackground = ld;
+            oldBackground = ld;
 
-			// http://stackoverflow.com/questions/11002691/actionbar-setbackgrounddrawable-nulling-background-from-thread-handler
-			getActionBar().setDisplayShowTitleEnabled(false);
-			getActionBar().setDisplayShowTitleEnabled(true);
+            // http://stackoverflow.com/questions/11002691/actionbar-setbackgrounddrawable-nulling-background-from-thread-handler
+            getActionBar().setDisplayShowTitleEnabled(false);
+            getActionBar().setDisplayShowTitleEnabled(true);
 
-		}
+        }
 
-		currentColor = newColor;
+        currentColor = newColor;
 
-	}
+    }
 
-	public void onColorClicked(View v) {
+    public void onColorClicked(View v) {
 
-		int color = Color.parseColor(v.getTag().toString());
-		changeColor(color);
+        int color = Color.parseColor(v.getTag().toString());
+        changeColor(color);
 
-	}
+    }
     public void onControlClicked(View v) {
 
         String command = v.getTag().toString();
@@ -329,11 +401,11 @@ public class MainActivity extends FragmentActivity {
                 playing=0;
             }
             else{
-                    musicSrv.start();
-                    if(musicSrv.isPlaying()) {
-                        imgvStop.setImageResource(R.drawable.stop);
-                        playing = 1;
-                    }
+                musicSrv.start();
+                if(musicSrv.isPlaying()) {
+                    imgvStop.setImageResource(R.drawable.stop);
+                    playing = 1;
+                }
             }
         }
         else if(command.equals("rewind")){
@@ -364,62 +436,62 @@ public class MainActivity extends FragmentActivity {
 
 
     }
-	@Override
-	protected void onSaveInstanceState(Bundle outState) {
-		super.onSaveInstanceState(outState);
-		outState.putInt("currentColor", currentColor);
-	}
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt("currentColor", currentColor);
+    }
 
-	@Override
-	protected void onRestoreInstanceState(Bundle savedInstanceState) {
-		super.onRestoreInstanceState(savedInstanceState);
-		currentColor = savedInstanceState.getInt("currentColor");
-		changeColor(currentColor);
-	}
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        currentColor = savedInstanceState.getInt("currentColor");
+        changeColor(currentColor);
+    }
 
-	private Drawable.Callback drawableCallback = new Drawable.Callback() {
-		@Override
-		public void invalidateDrawable(Drawable who) {
+    private Drawable.Callback drawableCallback = new Drawable.Callback() {
+        @Override
+        public void invalidateDrawable(Drawable who) {
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
                 getActionBar().setBackgroundDrawable(who);
             }
-		}
+        }
 
-		@Override
-		public void scheduleDrawable(Drawable who, Runnable what, long when) {
-			handler.postAtTime(what, when);
-		}
+        @Override
+        public void scheduleDrawable(Drawable who, Runnable what, long when) {
+            handler.postAtTime(what, when);
+        }
 
-		@Override
-		public void unscheduleDrawable(Drawable who, Runnable what) {
-			handler.removeCallbacks(what);
-		}
-	};
+        @Override
+        public void unscheduleDrawable(Drawable who, Runnable what) {
+            handler.removeCallbacks(what);
+        }
+    };
 
-	public class MyPagerAdapter extends FragmentPagerAdapter {
+    public class MyPagerAdapter extends FragmentPagerAdapter {
         Resources res = getResources();
-		private final String[] TITLES = { res.getString(R.string.artists), res.getString(R.string.albums), res.getString(R.string.songs) };
+        private final String[] TITLES = { res.getString(R.string.artists), res.getString(R.string.albums), res.getString(R.string.songs) };
 
-		public MyPagerAdapter(FragmentManager fm) {
-			super(fm);
-		}
+        public MyPagerAdapter(FragmentManager fm) {
+            super(fm);
+        }
 
-		@Override
-		public CharSequence getPageTitle(int position) {
-			return TITLES[position];
-		}
+        @Override
+        public CharSequence getPageTitle(int position) {
+            return TITLES[position];
+        }
 
-		@Override
-		public int getCount() {
-			return TITLES.length;
-		}
+        @Override
+        public int getCount() {
+            return TITLES.length;
+        }
 
-		@Override
-		public Fragment getItem(int position) {
-			return LibraryFragment.newInstance(position);
-		}
+        @Override
+        public Fragment getItem(int position) {
+            return LibraryFragment.newInstance(position);
+        }
 
-	}
+    }
 
 }
