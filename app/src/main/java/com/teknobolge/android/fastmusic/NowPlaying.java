@@ -50,6 +50,7 @@ public class NowPlaying extends FragmentActivity {
     private Resources res;
     private PagerSlidingTabStrip tabs;
     private String palbumkey="";
+    boolean donotrefresh=false;
     private ViewPager pager;
     private MyPagerAdapter adapter;
     private ImageView imgvStop;
@@ -138,23 +139,36 @@ public class NowPlaying extends FragmentActivity {
     @Override
     public void onPause(){
         super.onPause();
+        donotrefresh=true;
         recycleAlbumArt();
-        palbumkey="";
-
+        albumart=BitmapFactory.decodeResource(getApplicationContext().getResources(),R.drawable.pixel);
+        albumimage.setImageBitmap(albumart);
 
     }
     @Override
     public void onResume(){
         super.onResume();
-        try{albumart.recycle();}catch (NullPointerException e){}
+        palbumkey="";
+        donotrefresh=false;
+        if(musicBound) {
+            updateViewFromService();
+        }
+        // recycleAlbumArt();
 
 
     }
     @Override
     public void onDestroy(){
         super.onDestroy();
+        donotrefresh=true;
         recycleAlbumArt();
 
+    }
+    @Override
+    public void onStop(){
+        super.onStop();
+        donotrefresh=true;
+        recycleAlbumArt();
 
     }
     @Override
@@ -238,12 +252,9 @@ public class NowPlaying extends FragmentActivity {
         }
         ((TextView)findViewById(R.id.infoSongTitle)).setText(title);
         ((TextView)findViewById(R.id.infoAlbumTitle)).setText(info);
+        int s=160;
         if(musicSrv.getAlbumKey()!=null&&!palbumkey.equals(musicSrv.getAlbumKey())) {
-            DisplayMetrics displayMetrics = new DisplayMetrics();
-            WindowManager wm = (WindowManager) getApplicationContext().getSystemService(Context.WINDOW_SERVICE);
-            wm.getDefaultDisplay().getMetrics(displayMetrics);
-            int s=MusicLibrary.getMax(displayMetrics.widthPixels, displayMetrics.heightPixels);
-            recycleAlbumArt();
+
             try {
 
                 String art=MusicLibrary.getAlbumArt(getApplicationContext(),musicSrv.getAlbumKey());
@@ -253,8 +264,8 @@ public class NowPlaying extends FragmentActivity {
                     BitmapFactory.decodeFile(art, options);
                     options.inSampleSize = MusicLibrary.calculateInSampleSize(options, s, s);
                     options.inJustDecodeBounds = false;
-                    try{albumart.recycle();}catch (NullPointerException e){}
-                    albumart = BitmapFactory.decodeFile(art,options);
+                    try{recycleAlbumArt();}catch (NullPointerException e){}
+                    albumart = BitmapFactory.decodeFile(art, options);
 
                     albumimage.setImageBitmap(albumart);
 
@@ -284,7 +295,6 @@ public class NowPlaying extends FragmentActivity {
                     BitmapFactory.decodeResource(getApplicationContext().getResources(),R.drawable.cover_logo,options);
                     options.inSampleSize = MusicLibrary.calculateInSampleSize(options, s, s);
                     options.inJustDecodeBounds = false;
-                    try{albumart.recycle();}catch (NullPointerException e){}
                     albumart=BitmapFactory.decodeResource(getApplicationContext().getResources(),R.drawable.cover_logo,options);
 
 
@@ -299,7 +309,6 @@ public class NowPlaying extends FragmentActivity {
                 BitmapFactory.decodeResource(getApplicationContext().getResources(),R.drawable.cover_logo,options);
                 options.inSampleSize = MusicLibrary.calculateInSampleSize(options, s, s);
                 options.inJustDecodeBounds = false;
-                try{albumart.recycle();}catch (NullPointerException e){}
                 albumart=BitmapFactory.decodeResource(getApplicationContext().getResources(),R.drawable.cover_logo,options);
                 albumimage.setImageBitmap(albumart);
             }
@@ -313,7 +322,9 @@ public class NowPlaying extends FragmentActivity {
             if(playing!=0)
                 imgvStop.setImageResource(R.drawable.play);
         }
-        updateViewHandler.postDelayed(run, 1000);
+        if(!donotrefresh) {
+            updateViewHandler.postDelayed(run, 1000);
+        }
     }
     public void changeColor(int newColor) {
 

@@ -170,7 +170,9 @@ public class MainActivity extends FragmentActivity {
         super.onResume();
         palbumkey="";
         donotrefresh=false;
-        updateViewHandler.postDelayed(run, 1000);
+        if(musicBound) {
+            updateViewFromService();
+        }
         // recycleAlbumArt();
 
 
