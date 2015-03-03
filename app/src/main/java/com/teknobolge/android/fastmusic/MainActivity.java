@@ -30,6 +30,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.ScaleAnimation;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
@@ -432,8 +434,28 @@ public class MainActivity extends FragmentActivity {
             }
         }
         else if(command.equals("albumArt")) {
-            Intent intent=new Intent(this, NowPlaying.class);
-            startActivity(intent);
+            ScaleAnimation animation = new ScaleAnimation((float)1, (float)1.4, (float)1, (float)1.4, Animation.RELATIVE_TO_SELF, (float)0.2, Animation.RELATIVE_TO_SELF, (float)1.0);
+            animation.setDuration(100);
+            animation.setAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) {
+
+                }
+
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    Intent intent=new Intent(getApplicationContext(), NowPlaying.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+                    startActivity(intent);
+
+                }
+
+                @Override
+                public void onAnimationRepeat(Animation animation) {
+
+                }
+            });
+            albumimage.startAnimation(animation);
         }
 
 

@@ -30,6 +30,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.animation.ScaleAnimation;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
@@ -175,14 +178,18 @@ public class NowPlaying extends FragmentActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.now_playing);
+        Intent servicestart = new Intent(this, MusicService.class);
+        startService(servicestart);
         albumimage = (ImageView) findViewById(R.id.albumArt);
         imgvStop=(ImageView)findViewById(R.id.stop);
         rlControlsBg=(RelativeLayout)findViewById(R.id.controlsbg);
         tabs = (PagerSlidingTabStrip) findViewById(R.id.tabs);
+        ScaleAnimation animation = new ScaleAnimation((float)0.01, 1, (float)0.01, 1, Animation.RELATIVE_TO_SELF, (float)0.0, Animation.RELATIVE_TO_SELF, (float)0.9);
+        animation.setDuration(400);
+        albumimage.startAnimation(animation);
         changeColor(currentColor);
         rlControlsBg.setBackgroundColor(Color.parseColor("#80666666"));
-        Intent servicestart = new Intent(this, MusicService.class);
-        startService(servicestart);
+
         imgvStop=(ImageView)findViewById(R.id.stop);
         //pager = (ViewPager) findViewById(R.id.pager);
         adapter = new MyPagerAdapter(getSupportFragmentManager());
@@ -191,6 +198,8 @@ public class NowPlaying extends FragmentActivity {
 
         final int pageMargin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4, getResources()
                 .getDisplayMetrics());
+        //Animation animation = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.zoom_art);
+
 //        pager.setPageMargin(pageMargin);
 
         //tabs.setViewPager(pager);
