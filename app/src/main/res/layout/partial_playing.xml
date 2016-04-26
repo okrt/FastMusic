@@ -13,46 +13,7 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_alignParentBottom="true">
-    <LinearLayout
-        android:id="@+id/songinfoov"
-        android:layout_width="match_parent"
 
-        android:layout_height="48dip"
-        android:layout_above="@+id/songcontrols"
-        android:layout_alignParentBottom="false"
-        android:layout_marginBottom="2dip"
-        android:layout_marginRight="4dip"
-        android:orientation="horizontal"
-        android:layout_toRightOf="@+id/albumArt"
-        android:layout_toEndOf="@+id/albumArt">
- <LinearLayout
-android:id="@+id/songinfo"
-android:layout_width="wrap_content"
-android:layout_height="48dip"
-android:layout_above="@+id/songcontrols"
-android:layout_alignParentBottom="false"
-android:layout_marginBottom="2dip"
-android:layout_marginLeft="4dip"
-android:layout_marginRight="4dip"
-android:orientation="vertical">
-<TextView
-    android:id="@+id/infoSongTitle"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:text="Play a song"
-    android:textColor="#ffffff"/>
-
-
-
-     <TextView
-         android:id="@+id/infoAlbumTitle"
-         android:layout_width="wrap_content"
-         android:layout_height="fill_parent"
-         android:text="Play a song"
-         android:textColor="#ffffff"
-         />
-</LinearLayout>
-    </LinearLayout>
 <LinearLayout
 android:id="@+id/songcontrols"
 android:layout_width="match_parent"
@@ -164,16 +125,6 @@ android:orientation="horizontal" >
         -->
 </LinearLayout>
 
-    <ImageView
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:id="@+id/albumArt"
-        android:tag="albumArt"
-        android:layout_gravity="right"
-        android:onClick="onControlClicked"
-        android:layout_alignTop="@+id/songinfoov"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:src="@drawable/ic_launcher" />
+
 </RelativeLayout>
 </RelativeLayout>
