@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">FastMusic</string>
+    <string name="about_developer">Geliştirici</string>
+    <string name="about_license">Lisans</string>
+    <string name="about_mail">E-Posta</string>
+    <string name="about_site">Website</string>
+    <string name="about_source">Kaynak Kod</string>
+    <string name="about_title">Uygulama Hakkında</string>
+    <string name="about_version">Sürüm</string>
+    <string name="action_search">Ara</string>
+    <string name="action_about">Hakkında</string>
+    <string name="action_exit">Çıkış</string>
+    <string name="volume">Ses Seviyesi</string>
+    <string name="unknown">Bilinmeyen</string>
+    <string name="title_activity_song_list"></string>
+    <string name="songs">Şarkılar</string>
+    <string name="site_link" translatable="false">https://toros.edu.tr/</string>
+    <string name="source_link" translatable="false">https://gitlab.com/fdroid/fdroidclient</string>
+    <string name="team_email" translatable="false">ug.cagdas.tatar@toros.edu.tr</string>
+    <string name="team_name" translatable="false">Çağdaş Tatar</string>
+    <string name="press_back">Geri tuşuna bir daha dokunun</string>
+    <string name="pref_language_default">Sistem Varsayılanı</string>
+    <string name="pref_language">Dil</string>
+    <string name="playlists">Çalma Listeleri</string>
+    <string name="play_pause">Oynat/Durdur</string>
+    <string name="play_a_song">Bir şarkı oynatın</string>
+    <string name="ok">TAMAM</string>
+    <string name="display">Ekran</string>
+    <string name="artists">Şarkıcılar</string>
+    <string name="action_language">Dil</string>
+    <string name="action_settings">Ayarlar</string>
+    <string name="albums">Albümler</string>
+    <string name="action_contact">İletişim</string>
+    <string name="app_description"></string>
+    <string name="close_notification"></string>
+    <string name="lang_dialog_title">Dil</string>
+    <string name="lang_dialog_message">Lütfen tercih ettiğiniz dili seçin</string>
+    <string name="lang_change">Değiştir</string>
+    <string name="lang_cancel">İptal</string>
+    <string-array name="lang_select">
+        <item>İngilizce</item>
+        <item>Türkçe</item>
+    </string-array>
+</resources>
+
